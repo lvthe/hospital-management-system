@@ -17,7 +17,7 @@ const getDoctors = async ({ page = 1, limit = 10, search = '', specialist = '', 
     idx++;
   }
   if (department_id) {
-    conditions.push(`dd.department_id = $${idx}`);
+    conditions.push(`dep.id = $${idx}`);
     values.push(department_id);
     idx++;
   }
@@ -27,9 +27,7 @@ const getDoctors = async ({ page = 1, limit = 10, search = '', specialist = '', 
   const countSql = `
     SELECT COUNT(*) FROM doctors d
     JOIN users u ON d.user_id = u.id
-    LEFT JOIN (
-      SELECT DISTINCT ON (doctor_id) doctor_id, department_id FROM staff
-    ) dd ON dd.doctor_id = d.id
+    LEFT JOIN departments dep ON dep.leader_id = d.id
     ${where}
   `;
   const countResult = await query(countSql, values);
@@ -39,9 +37,11 @@ const getDoctors = async ({ page = 1, limit = 10, search = '', specialist = '', 
     SELECT d.id, d.user_id, d.specialist, d.license_number, d.license_expiry,
            d.phone_extension, d.office_room, d.max_patients_per_day, d.bio,
            d.created_at, d.updated_at,
-           u.full_name, u.email, u.phone, u.avatar_url, u.is_active
+           u.full_name, u.email, u.phone, u.avatar_url, u.is_active,
+           dep.id AS department_id, dep.name AS department_name
     FROM doctors d
     JOIN users u ON d.user_id = u.id
+    LEFT JOIN departments dep ON dep.leader_id = d.id
     ${where}
     ORDER BY u.full_name ASC
     LIMIT $${idx} OFFSET $${idx + 1}
