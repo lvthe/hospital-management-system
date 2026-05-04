@@ -6,16 +6,43 @@ import {
   ListItemText, Typography, Divider, Avatar, Button,
 } from '@mui/material';
 import {
-  Dashboard, People, CalendarMonth, LocalHospital,
-  Logout, MedicalServices,
+  Dashboard, People, CalendarMonth, LocalHospital, Logout,
+  MedicalServices, MedicalInformation, Medication, Receipt,
+  Business, BarChart, Description,
 } from '@mui/icons-material';
 import { logout } from '../../store/slices/authSlice';
 
-const NAV_ITEMS = [
-  { label: 'Dashboard', icon: <Dashboard />, to: '/dashboard' },
-  { label: 'Bệnh nhân', icon: <People />, to: '/patients', roles: ['admin', 'doctor', 'nurse', 'receptionist'] },
-  { label: 'Lịch hẹn', icon: <CalendarMonth />, to: '/appointments' },
-  { label: 'Bác sĩ', icon: <MedicalServices />, to: '/doctors' },
+const NAV_GROUPS = [
+  {
+    label: 'Tổng quan',
+    items: [
+      { label: 'Dashboard', icon: <Dashboard />, to: '/dashboard' },
+    ],
+  },
+  {
+    label: 'Quản lý bệnh nhân',
+    items: [
+      { label: 'Bệnh nhân', icon: <People />, to: '/patients', roles: ['admin', 'doctor', 'nurse', 'receptionist'] },
+      { label: 'Lịch hẹn', icon: <CalendarMonth />, to: '/appointments' },
+      { label: 'Hồ sơ y tế', icon: <MedicalInformation />, to: '/medical-records', roles: ['admin', 'doctor', 'nurse'] },
+      { label: 'Đơn thuốc', icon: <Description />, to: '/prescriptions', roles: ['admin', 'doctor', 'nurse'] },
+    ],
+  },
+  {
+    label: 'Y tế & Dược',
+    items: [
+      { label: 'Bác sĩ', icon: <MedicalServices />, to: '/doctors' },
+      { label: 'Thuốc', icon: <Medication />, to: '/medications', roles: ['admin', 'doctor', 'nurse', 'receptionist'] },
+    ],
+  },
+  {
+    label: 'Tài chính & Tổ chức',
+    items: [
+      { label: 'Hóa đơn', icon: <Receipt />, to: '/invoices', roles: ['admin', 'receptionist', 'doctor'] },
+      { label: 'Phòng ban', icon: <Business />, to: '/departments' },
+      { label: 'Báo cáo', icon: <BarChart />, to: '/reports', roles: ['admin', 'doctor'] },
+    ],
+  },
 ];
 
 const ROLE_LABELS = {
@@ -36,12 +63,12 @@ function SidebarContent({ onClose }) {
     navigate('/login');
   };
 
-  const visibleItems = NAV_ITEMS.filter(item => !item.roles || item.roles.includes(user?.role));
+  const isVisible = (item) => !item.roles || item.roles.includes(user?.role);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: '#1a237e' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: '#1a237e', overflowY: 'auto' }}>
       {/* Logo */}
-      <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 1.5, flexShrink: 0 }}>
         <Box sx={{ bgcolor: 'white', borderRadius: '50%', p: 0.8, display: 'flex' }}>
           <LocalHospital sx={{ color: '#1a237e', fontSize: 24 }} />
         </Box>
@@ -53,8 +80,8 @@ function SidebarContent({ onClose }) {
 
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.15)' }} />
 
-      {/* User info */}
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      {/* User */}
+      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5, flexShrink: 0 }}>
         <Avatar sx={{ bgcolor: '#42a5f5', width: 40, height: 40, fontSize: 16 }}>
           {user?.full_name?.charAt(0)?.toUpperCase()}
         </Avatar>
@@ -64,32 +91,46 @@ function SidebarContent({ onClose }) {
         </Box>
       </Box>
 
-      <Divider sx={{ borderColor: 'rgba(255,255,255,0.15)', mb: 1 }} />
+      <Divider sx={{ borderColor: 'rgba(255,255,255,0.15)', mb: 0.5 }} />
 
-      {/* Nav */}
-      <List sx={{ flexGrow: 1, px: 1 }}>
-        {visibleItems.map((item) => (
-          <ListItem key={item.to} disablePadding sx={{ mb: 0.5 }}>
-            <ListItemButton
-              component={NavLink}
-              to={item.to}
-              onClick={onClose}
-              sx={{
-                borderRadius: 2,
-                color: 'rgba(255,255,255,0.7)',
-                '&.active': { bgcolor: 'rgba(255,255,255,0.15)', color: 'white' },
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.1)', color: 'white' },
-              }}
-            >
-              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} primaryTypographyProps={{ fontSize: 14, fontWeight: 500 }} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+      {/* Nav groups */}
+      <Box sx={{ flexGrow: 1, px: 1 }}>
+        {NAV_GROUPS.map((group) => {
+          const visible = group.items.filter(isVisible);
+          if (!visible.length) return null;
+          return (
+            <Box key={group.label} sx={{ mb: 0.5 }}>
+              <Typography variant="caption" sx={{ px: 1.5, py: 0.5, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 0.8, fontSize: 10, display: 'block' }}>
+                {group.label}
+              </Typography>
+              <List disablePadding>
+                {visible.map((item) => (
+                  <ListItem key={item.to} disablePadding sx={{ mb: 0.25 }}>
+                    <ListItemButton
+                      component={NavLink}
+                      to={item.to}
+                      onClick={onClose}
+                      sx={{
+                        borderRadius: 2, py: 0.75,
+                        color: 'rgba(255,255,255,0.7)',
+                        '&.active': { bgcolor: 'rgba(255,255,255,0.15)', color: 'white' },
+                        '&:hover': { bgcolor: 'rgba(255,255,255,0.1)', color: 'white' },
+                      }}
+                    >
+                      <ListItemIcon sx={{ color: 'inherit', minWidth: 36 }}>{item.icon}</ListItemIcon>
+                      <ListItemText primary={item.label} primaryTypographyProps={{ fontSize: 13, fontWeight: 500 }} />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+          );
+        })}
+      </Box>
 
       {/* Logout */}
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: 2, flexShrink: 0 }}>
+        <Divider sx={{ borderColor: 'rgba(255,255,255,0.15)', mb: 1.5 }} />
         <Button
           fullWidth startIcon={<Logout />}
           onClick={handleLogout}
@@ -105,7 +146,6 @@ function SidebarContent({ onClose }) {
 export default function Sidebar({ width, mobileOpen, onClose }) {
   return (
     <>
-      {/* Mobile */}
       <Drawer
         variant="temporary" open={mobileOpen} onClose={onClose}
         ModalProps={{ keepMounted: true }}
@@ -113,8 +153,6 @@ export default function Sidebar({ width, mobileOpen, onClose }) {
       >
         <SidebarContent onClose={onClose} />
       </Drawer>
-
-      {/* Desktop */}
       <Drawer
         variant="permanent"
         sx={{ display: { xs: 'none', md: 'block' }, '& .MuiDrawer-paper': { width, border: 'none', boxSizing: 'border-box' } }}

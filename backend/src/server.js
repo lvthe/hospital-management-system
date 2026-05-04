@@ -74,10 +74,16 @@ app.get("/api/v1/health", (req, res) => {
 });
 
 // API Routes
-app.use('/api/v1/auth', require('./routes/authRoutes'));
-app.use('/api/v1/patients', require('./routes/patientRoutes'));
-app.use('/api/v1/doctors', require('./routes/doctorRoutes'));
-app.use('/api/v1/appointments', require('./routes/appointmentRoutes'));
+app.use('/api/v1/auth',           require('./routes/authRoutes'));
+app.use('/api/v1/patients',       require('./routes/patientRoutes'));
+app.use('/api/v1/doctors',        require('./routes/doctorRoutes'));
+app.use('/api/v1/appointments',   require('./routes/appointmentRoutes'));
+app.use('/api/v1/medical-records',require('./routes/medicalRecordRoutes'));
+app.use('/api/v1/medications',    require('./routes/medicationRoutes'));
+app.use('/api/v1/prescriptions',  require('./routes/prescriptionRoutes'));
+app.use('/api/v1/invoices',       require('./routes/invoiceRoutes'));
+app.use('/api/v1/departments',    require('./routes/departmentRoutes'));
+app.use('/api/v1/reports',        require('./routes/reportRoutes'));
 
 /**
  * ==================================================

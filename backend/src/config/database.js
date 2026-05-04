@@ -10,7 +10,7 @@ const poolConfig = process.env.DATABASE_URL
       max: parseInt(process.env.DB_POOL_MAX) || 10,
       min: parseInt(process.env.DB_POOL_MIN) || 2,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
+      connectionTimeoutMillis: 15000,
     }
   : {
       user: process.env.DB_USER,
@@ -22,7 +22,7 @@ const poolConfig = process.env.DATABASE_URL
       max: parseInt(process.env.DB_POOL_MAX) || 10,
       min: parseInt(process.env.DB_POOL_MIN) || 2,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
+      connectionTimeoutMillis: 15000,
     };
 
 const pool = new Pool(poolConfig);
@@ -33,15 +33,18 @@ pool.on("error", (err) => {
 
 const query = (text, params) => pool.query(text, params);
 
-const connectDB = async () => {
-  try {
-    const result = await pool.query("SELECT NOW()");
-    console.log("✅ PostgreSQL connected:", result.rows[0].now);
-    return true;
-  } catch (error) {
-    console.error("❌ PostgreSQL connection failed:", error.message);
-    return false;
+const connectDB = async (retries = 3, delayMs = 3000) => {
+  for (let i = 1; i <= retries; i++) {
+    try {
+      const result = await pool.query("SELECT NOW()");
+      console.log("✅ PostgreSQL connected:", result.rows[0].now);
+      return true;
+    } catch (error) {
+      console.error(`❌ PostgreSQL connection failed (attempt ${i}/${retries}):`, error.message);
+      if (i < retries) await new Promise((r) => setTimeout(r, delayMs));
+    }
   }
+  return false;
 };
 
 const closeDB = async () => {
