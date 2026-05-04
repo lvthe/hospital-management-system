@@ -18,7 +18,7 @@ router.get("/:id", checkRole("admin", "doctor", "nurse", "receptionist"), c.get)
 router.post("/", checkRole("admin", "receptionist"), c.create);
 
 // PUT /api/v1/patients/:id - cập nhật
-router.put("/:id", checkRole("admin", "doctor", "nurse", "receptionist"), c.update);
+router.put("/:id", checkRole("admin", "receptionist"), c.update);
 
 // DELETE /api/v1/patients/:id - xóa (admin only)
 router.delete("/:id", checkRole("admin"), c.remove);

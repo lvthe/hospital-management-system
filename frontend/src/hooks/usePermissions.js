@@ -9,10 +9,10 @@ const PERMISSIONS = {
   'patients.delete': ['admin'],
 
   // ── Lịch hẹn ──────────────────────────────────────────────────────
-  'appointments.list':         ['admin', 'doctor', 'nurse', 'receptionist', 'patient'],
+  'appointments.list':         ['admin', 'doctor', 'nurse', 'receptionist'],
   'appointments.create':       ['admin', 'receptionist', 'patient'],
-  'appointments.cancel':       ['admin', 'doctor', 'nurse', 'receptionist', 'patient'],
-  'appointments.updateStatus': ['admin', 'doctor', 'nurse'],
+  'appointments.cancel':       ['admin', 'doctor', 'nurse', 'receptionist'],
+  'appointments.updateStatus': ['admin', 'doctor', 'nurse', 'receptionist'],
 
   // ── Hồ sơ y tế ────────────────────────────────────────────────────
   'medicalRecords.view':   ['admin', 'doctor', 'nurse'],

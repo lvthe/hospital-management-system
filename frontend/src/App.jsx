@@ -36,9 +36,10 @@ const PrivateRoute = ({ children }) => {
 };
 
 const PublicRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useSelector((s) => s.auth);
+  const { isAuthenticated, loading, user } = useSelector((s) => s.auth);
   if (loading) return null;
-  return !isAuthenticated ? children : <Navigate to="/dashboard" replace />;
+  if (!isAuthenticated) return children;
+  return user?.role === 'patient' ? <Navigate to="/patient-portal" replace /> : <Navigate to="/dashboard" replace />;
 };
 
 // Trang mặc định theo role

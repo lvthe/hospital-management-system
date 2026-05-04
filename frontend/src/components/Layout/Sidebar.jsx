@@ -41,7 +41,7 @@ const STAFF_NAV_GROUPS = [
     items: [
       { label: 'Hóa đơn',  icon: <Receipt />,  to: '/invoices',    roles: ['admin', 'receptionist', 'doctor'] },
       { label: 'Phòng ban',icon: <Business />, to: '/departments' },
-      { label: 'Báo cáo', icon: <BarChart />,  to: '/reports',     roles: ['admin', 'doctor'] },
+      { label: 'Báo cáo', icon: <BarChart />,  to: '/reports',     roles: ['admin', 'doctor', 'receptionist'] },
     ],
   },
 ];
