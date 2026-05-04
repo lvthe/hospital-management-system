@@ -11,7 +11,7 @@ const getMonthRange = () => {
   const now = new Date();
   const first = new Date(now.getFullYear(), now.getMonth(), 1);
   const last  = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  const fmt = (d) => d.toISOString().split('T')[0];
+  const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   return { from: fmt(first), to: fmt(last) };
 };
 
