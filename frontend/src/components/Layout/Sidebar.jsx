@@ -17,14 +17,14 @@ const STAFF_NAV_GROUPS = [
   {
     label: 'Tổng quan',
     items: [
-      { label: 'Dashboard', icon: <Dashboard />, to: '/dashboard' },
+      { label: 'Dashboard', icon: <Dashboard />, to: '/dashboard', roles: ['admin', 'doctor', 'nurse', 'receptionist'] },
     ],
   },
   {
     label: 'Quản lý bệnh nhân',
     items: [
       { label: 'Bệnh nhân',  icon: <People />,           to: '/patients',        roles: ['admin', 'doctor', 'nurse', 'receptionist'] },
-      { label: 'Lịch hẹn',  icon: <CalendarMonth />,     to: '/appointments' },
+      { label: 'Lịch hẹn',  icon: <CalendarMonth />,     to: '/appointments',    roles: ['admin', 'doctor', 'nurse', 'receptionist'] },
       { label: 'Hồ sơ y tế',icon: <MedicalInformation />,to: '/medical-records', roles: ['admin', 'doctor', 'nurse'] },
       { label: 'Đơn thuốc', icon: <Description />,       to: '/prescriptions',   roles: ['admin', 'doctor', 'nurse'] },
     ],
@@ -32,7 +32,7 @@ const STAFF_NAV_GROUPS = [
   {
     label: 'Y tế & Dược',
     items: [
-      { label: 'Bác sĩ', icon: <MedicalServices />, to: '/doctors' },
+      { label: 'Bác sĩ', icon: <MedicalServices />, to: '/doctors',     roles: ['admin', 'doctor', 'nurse', 'receptionist'] },
       { label: 'Thuốc',  icon: <Medication />,      to: '/medications', roles: ['admin', 'doctor', 'nurse', 'receptionist'] },
     ],
   },
@@ -40,7 +40,7 @@ const STAFF_NAV_GROUPS = [
     label: 'Tài chính & Tổ chức',
     items: [
       { label: 'Hóa đơn',  icon: <Receipt />,  to: '/invoices',    roles: ['admin', 'receptionist', 'doctor'] },
-      { label: 'Phòng ban',icon: <Business />, to: '/departments' },
+      { label: 'Phòng ban',icon: <Business />, to: '/departments', roles: ['admin', 'doctor', 'nurse', 'receptionist'] },
       { label: 'Báo cáo', icon: <BarChart />,  to: '/reports',     roles: ['admin', 'doctor', 'receptionist'] },
     ],
   },
