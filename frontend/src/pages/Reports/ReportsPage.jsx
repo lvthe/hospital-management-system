@@ -7,6 +7,14 @@ import {
 import { TrendingUp, CalendarMonth, LocalPharmacy, Search } from '@mui/icons-material';
 import api from '../../services/api';
 
+const getMonthRange = () => {
+  const now = new Date();
+  const first = new Date(now.getFullYear(), now.getMonth(), 1);
+  const last  = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const fmt = (d) => d.toISOString().split('T')[0];
+  return { from: fmt(first), to: fmt(last) };
+};
+
 const StatCard = ({ title, value, subtitle, color }) => (
   <Paper elevation={0} sx={{ p: 2.5, border: '1px solid #e0e0e0', borderRadius: 2 }}>
     <Typography variant="body2" color="text.secondary" gutterBottom>{title}</Typography>
@@ -19,8 +27,8 @@ function RevenueTab() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [dateFrom, setDateFrom] = useState(() => getMonthRange().from);
+  const [dateTo,   setDateTo]   = useState(() => getMonthRange().to);
 
   const load = async () => {
     setLoading(true); setError('');
@@ -125,8 +133,8 @@ function AppointmentsTab() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [dateFrom, setDateFrom] = useState(() => getMonthRange().from);
+  const [dateTo,   setDateTo]   = useState(() => getMonthRange().to);
 
   const load = async () => {
     setLoading(true); setError('');
