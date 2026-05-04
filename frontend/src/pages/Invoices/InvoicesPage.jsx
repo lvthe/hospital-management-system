@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import { Add, Search, Refresh, Payment, Cancel, Visibility, AddCircle, RemoveCircle } from '@mui/icons-material';
 import { fetchInvoices, createInvoice, payInvoice, cancelInvoice } from '../../store/slices/invoiceSlice';
+import { usePermissions } from '../../hooks/usePermissions';
 import api from '../../services/api';
 
 const STATUS_COLORS = { pending: 'warning', paid: 'success', partially_paid: 'info', overdue: 'error', cancelled: 'default' };
@@ -22,7 +23,7 @@ const EMPTY_ITEM = { item_type: 'consultation', description: '', quantity: 1, un
 export default function InvoicesPage() {
   const dispatch = useDispatch();
   const { list, pagination, loading, error } = useSelector((s) => s.invoices);
-  const { user } = useSelector((s) => s.auth);
+  const { can } = usePermissions();
 
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
@@ -76,7 +77,7 @@ export default function InvoicesPage() {
     await dispatch(cancelInvoice(id)); load();
   };
 
-  const canCreate = ['admin', 'receptionist'].includes(user?.role);
+  const canCreate = can('invoices.create');
 
   return (
     <Box>
@@ -130,12 +131,12 @@ export default function InvoicesPage() {
                     <TableCell>{inv.due_date ? new Date(inv.due_date).toLocaleDateString('vi-VN') : '—'}</TableCell>
                     <TableCell align="right">
                       <IconButton size="small" onClick={() => setViewOpen(inv)} title="Chi tiết"><Visibility fontSize="small" /></IconButton>
-                      {canCreate && !['paid', 'cancelled'].includes(inv.status) && (
+                      {can('invoices.pay') && !['paid', 'cancelled'].includes(inv.status) && (
                         <IconButton size="small" color="success" title="Thanh toán" onClick={() => { setPayOpen(inv); setPayForm({ amount_paid: String(inv.total_amount - inv.paid_amount), payment_method: 'cash' }); }}>
                           <Payment fontSize="small" />
                         </IconButton>
                       )}
-                      {user?.role === 'admin' && inv.status !== 'cancelled' && (
+                      {can('invoices.cancel') && inv.status !== 'cancelled' && (
                         <IconButton size="small" color="error" title="Hủy" onClick={() => handleCancel(inv.id)}><Cancel fontSize="small" /></IconButton>
                       )}
                     </TableCell>

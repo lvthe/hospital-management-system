@@ -10,6 +10,7 @@ import { Add, Search, Edit, Delete, Refresh, AddCircle, RemoveCircle, Warning } 
 import {
   fetchMedications, createMedication, updateMedication, adjustMedicationStock, deleteMedication,
 } from '../../store/slices/medicationSlice';
+import { usePermissions } from '../../hooks/usePermissions';
 
 const EMPTY_FORM = {
   name: '', dosage: '', description: '', unit_price: '', stock_quantity: '', reorder_level: '100', expiry_date: '',
@@ -18,7 +19,7 @@ const EMPTY_FORM = {
 export default function MedicationsPage() {
   const dispatch = useDispatch();
   const { list, pagination, loading, error } = useSelector((s) => s.medications);
-  const { user } = useSelector((s) => s.auth);
+  const { can } = usePermissions();
 
   const [search, setSearch] = useState('');
   const [lowStock, setLowStock] = useState(false);
@@ -79,7 +80,7 @@ export default function MedicationsPage() {
     setDeleteId(null); load();
   };
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = can('medications.create');
 
   return (
     <Box>
@@ -144,7 +145,7 @@ export default function MedicationsPage() {
                       <TableCell align="right">{Number(med.unit_price).toLocaleString('vi-VN')}</TableCell>
                       <TableCell>{med.expiry_date ? new Date(med.expiry_date).toLocaleDateString('vi-VN') : '—'}</TableCell>
                       <TableCell align="right">
-                        {['admin', 'nurse'].includes(user?.role) && (
+                        {can('medications.stock') && (
                           <IconButton size="small" color="success" title="Nhập/xuất kho" onClick={() => { setStockDialog(med); setStockDelta(''); }}>
                             <AddCircle fontSize="small" />
                           </IconButton>

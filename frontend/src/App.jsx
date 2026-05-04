@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ThemeProvider, createTheme } from '@mui/material';
 import { loadUser } from './store/slices/authSlice';
 import Layout from './components/Layout/Layout';
+import RoleRoute from './components/RoleRoute';
 import LoginPage from './pages/Login/LoginPage';
 import RegisterPage from './pages/Register/RegisterPage';
 import DashboardPage from './pages/Dashboard/DashboardPage';
@@ -16,6 +17,8 @@ import PrescriptionsPage from './pages/Prescriptions/PrescriptionsPage';
 import InvoicesPage from './pages/Invoices/InvoicesPage';
 import DepartmentsPage from './pages/Departments/DepartmentsPage';
 import ReportsPage from './pages/Reports/ReportsPage';
+import PatientPortalPage from './pages/Patient/PatientPortalPage';
+import UnauthorizedPage from './pages/Unauthorized/UnauthorizedPage';
 
 const theme = createTheme({
   palette: {
@@ -38,6 +41,13 @@ const PublicRoute = ({ children }) => {
   return !isAuthenticated ? children : <Navigate to="/dashboard" replace />;
 };
 
+// Trang mặc định theo role
+const DefaultRedirect = () => {
+  const { user } = useSelector((s) => s.auth);
+  if (user?.role === 'patient') return <Navigate to="/patient-portal" replace />;
+  return <Navigate to="/dashboard" replace />;
+};
+
 export default function App() {
   const dispatch = useDispatch();
 
@@ -51,20 +61,66 @@ export default function App() {
         <Routes>
           <Route path="/login"    element={<PublicRoute><LoginPage /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
           <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
-            <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard"       element={<DashboardPage />} />
-            <Route path="patients"        element={<PatientsPage />} />
-            <Route path="appointments"    element={<AppointmentsPage />} />
-            <Route path="doctors"         element={<DoctorsPage />} />
-            <Route path="medical-records" element={<MedicalRecordsPage />} />
-            <Route path="medications"     element={<MedicationsPage />} />
-            <Route path="prescriptions"   element={<PrescriptionsPage />} />
-            <Route path="invoices"        element={<InvoicesPage />} />
-            <Route path="departments"     element={<DepartmentsPage />} />
-            <Route path="reports"         element={<ReportsPage />} />
+            <Route index element={<DefaultRedirect />} />
+
+            {/* ── Trang chung ─────────────────────────────────────── */}
+            <Route path="doctors" element={<DoctorsPage />} />
+
+            {/* ── Cổng bệnh nhân ────────────────────────────────────*/}
+            <Route path="patient-portal" element={
+              <RoleRoute permission="patient.portal"><PatientPortalPage /></RoleRoute>
+            } />
+
+            {/* ── Dashboard (staff) ─────────────────────────────────*/}
+            <Route path="dashboard" element={
+              <RoleRoute roles={['admin', 'doctor', 'nurse', 'receptionist']}><DashboardPage /></RoleRoute>
+            } />
+
+            {/* ── Bệnh nhân ─────────────────────────────────────────*/}
+            <Route path="patients" element={
+              <RoleRoute permission="patients.list"><PatientsPage /></RoleRoute>
+            } />
+
+            {/* ── Lịch hẹn (staff) ──────────────────────────────────*/}
+            <Route path="appointments" element={
+              <RoleRoute roles={['admin', 'doctor', 'nurse', 'receptionist']}><AppointmentsPage /></RoleRoute>
+            } />
+
+            {/* ── Hồ sơ y tế ────────────────────────────────────────*/}
+            <Route path="medical-records" element={
+              <RoleRoute permission="medicalRecords.view"><MedicalRecordsPage /></RoleRoute>
+            } />
+
+            {/* ── Thuốc ─────────────────────────────────────────────*/}
+            <Route path="medications" element={
+              <RoleRoute permission="medications.view"><MedicationsPage /></RoleRoute>
+            } />
+
+            {/* ── Đơn thuốc ─────────────────────────────────────────*/}
+            <Route path="prescriptions" element={
+              <RoleRoute permission="prescriptions.view"><PrescriptionsPage /></RoleRoute>
+            } />
+
+            {/* ── Hóa đơn ───────────────────────────────────────────*/}
+            <Route path="invoices" element={
+              <RoleRoute permission="invoices.view"><InvoicesPage /></RoleRoute>
+            } />
+
+            {/* ── Phòng ban ─────────────────────────────────────────*/}
+            <Route path="departments" element={
+              <RoleRoute permission="departments.view"><DepartmentsPage /></RoleRoute>
+            } />
+
+            {/* ── Báo cáo ───────────────────────────────────────────*/}
+            <Route path="reports" element={
+              <RoleRoute permission="reports.view"><ReportsPage /></RoleRoute>
+            } />
           </Route>
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+
+          <Route path="*" element={<DefaultRedirect />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

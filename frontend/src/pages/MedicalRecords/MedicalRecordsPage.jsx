@@ -10,6 +10,7 @@ import { Add, Search, Edit, Delete, Refresh, Visibility } from '@mui/icons-mater
 import {
   fetchMedicalRecords, createMedicalRecord, updateMedicalRecord, deleteMedicalRecord,
 } from '../../store/slices/medicalRecordSlice';
+import { usePermissions } from '../../hooks/usePermissions';
 import api from '../../services/api';
 
 const EMPTY_FORM = {
@@ -21,7 +22,7 @@ const EMPTY_FORM = {
 export default function MedicalRecordsPage() {
   const dispatch = useDispatch();
   const { list, pagination, loading, error } = useSelector((s) => s.medicalRecords);
-  const { user } = useSelector((s) => s.auth);
+  const { can } = usePermissions();
 
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -85,8 +86,8 @@ export default function MedicalRecordsPage() {
     setDeleteId(null); load();
   };
 
-  const canWrite = ['admin', 'doctor'].includes(user?.role);
-  const canDelete = user?.role === 'admin';
+  const canWrite = can('medicalRecords.create');
+  const canDelete = can('medicalRecords.delete');
 
   return (
     <Box>

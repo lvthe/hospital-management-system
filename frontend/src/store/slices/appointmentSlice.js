@@ -28,6 +28,15 @@ export const cancelAppointment = createAsyncThunk('appointments/cancel', async (
   }
 });
 
+export const updateAppointmentStatus = createAsyncThunk('appointments/updateStatus', async ({ id, status }, { rejectWithValue }) => {
+  try {
+    const { data } = await api.put(`/appointments/${id}`, { status });
+    return data.data;
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.message || 'Lỗi cập nhật trạng thái');
+  }
+});
+
 const appointmentSlice = createSlice({
   name: 'appointments',
   initialState: { list: [], pagination: null, loading: false, error: null },
@@ -43,6 +52,10 @@ const appointmentSlice = createSlice({
       .addCase(cancelAppointment.fulfilled, (s, { payload }) => {
         const i = s.list.findIndex(a => a.id === payload.id);
         if (i >= 0) s.list[i] = { ...s.list[i], status: 'cancelled' };
+      })
+      .addCase(updateAppointmentStatus.fulfilled, (s, { payload }) => {
+        const i = s.list.findIndex(a => a.id === payload.id);
+        if (i >= 0) s.list[i] = { ...s.list[i], ...payload };
       });
   },
 });

@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import { Add, Search, Edit, Delete, Refresh } from '@mui/icons-material';
 import { fetchPatients, createPatient, updatePatient, deletePatient } from '../../store/slices/patientSlice';
+import { usePermissions } from '../../hooks/usePermissions';
 
 const BLOOD_TYPES = ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
 const GENDERS = [{ value: 'M', label: 'Nam' }, { value: 'F', label: 'Nữ' }, { value: 'Other', label: 'Khác' }];
@@ -22,6 +23,7 @@ const EMPTY_FORM = {
 export default function PatientsPage() {
   const dispatch = useDispatch();
   const { list, pagination, loading, error } = useSelector((s) => s.patients);
+  const { can } = usePermissions();
 
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -104,7 +106,9 @@ export default function PatientsPage() {
         <Button variant="outlined" onClick={handleSearch}>Tìm</Button>
         <Button variant="outlined" startIcon={<Refresh />} onClick={() => load()}>Làm mới</Button>
         <Box sx={{ flexGrow: 1 }} />
-        <Button variant="contained" startIcon={<Add />} onClick={openCreate}>Thêm bệnh nhân</Button>
+        {can('patients.create') && (
+          <Button variant="contained" startIcon={<Add />} onClick={openCreate}>Thêm bệnh nhân</Button>
+        )}
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -142,8 +146,12 @@ export default function PatientsPage() {
                     <Chip label={p.is_active ? 'Hoạt động' : 'Khóa'} color={p.is_active ? 'success' : 'default'} size="small" />
                   </TableCell>
                   <TableCell align="center">
-                    <IconButton size="small" onClick={() => openEdit(p)} color="primary"><Edit fontSize="small" /></IconButton>
-                    <IconButton size="small" onClick={() => setDeleteId(p.id)} color="error"><Delete fontSize="small" /></IconButton>
+                    {can('patients.edit') && (
+                      <IconButton size="small" onClick={() => openEdit(p)} color="primary"><Edit fontSize="small" /></IconButton>
+                    )}
+                    {can('patients.delete') && (
+                      <IconButton size="small" onClick={() => setDeleteId(p.id)} color="error"><Delete fontSize="small" /></IconButton>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

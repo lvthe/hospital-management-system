@@ -8,11 +8,12 @@ import {
 import {
   Dashboard, People, CalendarMonth, LocalHospital, Logout,
   MedicalServices, MedicalInformation, Medication, Receipt,
-  Business, BarChart, Description,
+  Business, BarChart, Description, AccountCircle,
 } from '@mui/icons-material';
 import { logout } from '../../store/slices/authSlice';
 
-const NAV_GROUPS = [
+// Menu cho staff (admin, doctor, nurse, receptionist)
+const STAFF_NAV_GROUPS = [
   {
     label: 'Tổng quan',
     items: [
@@ -22,25 +23,36 @@ const NAV_GROUPS = [
   {
     label: 'Quản lý bệnh nhân',
     items: [
-      { label: 'Bệnh nhân', icon: <People />, to: '/patients', roles: ['admin', 'doctor', 'nurse', 'receptionist'] },
-      { label: 'Lịch hẹn', icon: <CalendarMonth />, to: '/appointments' },
-      { label: 'Hồ sơ y tế', icon: <MedicalInformation />, to: '/medical-records', roles: ['admin', 'doctor', 'nurse'] },
-      { label: 'Đơn thuốc', icon: <Description />, to: '/prescriptions', roles: ['admin', 'doctor', 'nurse'] },
+      { label: 'Bệnh nhân',  icon: <People />,           to: '/patients',        roles: ['admin', 'doctor', 'nurse', 'receptionist'] },
+      { label: 'Lịch hẹn',  icon: <CalendarMonth />,     to: '/appointments' },
+      { label: 'Hồ sơ y tế',icon: <MedicalInformation />,to: '/medical-records', roles: ['admin', 'doctor', 'nurse'] },
+      { label: 'Đơn thuốc', icon: <Description />,       to: '/prescriptions',   roles: ['admin', 'doctor', 'nurse'] },
     ],
   },
   {
     label: 'Y tế & Dược',
     items: [
       { label: 'Bác sĩ', icon: <MedicalServices />, to: '/doctors' },
-      { label: 'Thuốc', icon: <Medication />, to: '/medications', roles: ['admin', 'doctor', 'nurse', 'receptionist'] },
+      { label: 'Thuốc',  icon: <Medication />,      to: '/medications', roles: ['admin', 'doctor', 'nurse', 'receptionist'] },
     ],
   },
   {
     label: 'Tài chính & Tổ chức',
     items: [
-      { label: 'Hóa đơn', icon: <Receipt />, to: '/invoices', roles: ['admin', 'receptionist', 'doctor'] },
-      { label: 'Phòng ban', icon: <Business />, to: '/departments' },
-      { label: 'Báo cáo', icon: <BarChart />, to: '/reports', roles: ['admin', 'doctor'] },
+      { label: 'Hóa đơn',  icon: <Receipt />,  to: '/invoices',    roles: ['admin', 'receptionist', 'doctor'] },
+      { label: 'Phòng ban',icon: <Business />, to: '/departments' },
+      { label: 'Báo cáo', icon: <BarChart />,  to: '/reports',     roles: ['admin', 'doctor'] },
+    ],
+  },
+];
+
+// Menu cho bệnh nhân
+const PATIENT_NAV_GROUPS = [
+  {
+    label: 'Cổng bệnh nhân',
+    items: [
+      { label: 'Hồ sơ của tôi', icon: <AccountCircle />, to: '/patient-portal' },
+      { label: 'Bác sĩ',        icon: <MedicalServices />, to: '/doctors' },
     ],
   },
 ];
@@ -64,6 +76,7 @@ function SidebarContent({ onClose }) {
   };
 
   const isVisible = (item) => !item.roles || item.roles.includes(user?.role);
+  const navGroups = user?.role === 'patient' ? PATIENT_NAV_GROUPS : STAFF_NAV_GROUPS;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: '#1a237e', overflowY: 'auto' }}>
@@ -95,7 +108,7 @@ function SidebarContent({ onClose }) {
 
       {/* Nav groups */}
       <Box sx={{ flexGrow: 1, px: 1 }}>
-        {NAV_GROUPS.map((group) => {
+        {navGroups.map((group) => {
           const visible = group.items.filter(isVisible);
           if (!visible.length) return null;
           return (

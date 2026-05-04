@@ -6,25 +6,29 @@ import {
   CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions,
   Grid, MenuItem, Alert, TextField, InputAdornment,
 } from '@mui/material';
-import { Add, Cancel, Refresh, Search } from '@mui/icons-material';
-import { fetchAppointments, createAppointment, cancelAppointment } from '../../store/slices/appointmentSlice';
+import { Add, Cancel, Refresh, CheckCircle, Update } from '@mui/icons-material';
+import { fetchAppointments, createAppointment, cancelAppointment, updateAppointmentStatus } from '../../store/slices/appointmentSlice';
+import { usePermissions } from '../../hooks/usePermissions';
 import api from '../../services/api';
 
 const STATUS_COLORS = { scheduled: 'primary', completed: 'success', cancelled: 'error', 'in-progress': 'warning', 'no-show': 'default' };
 const STATUS_LABELS = { scheduled: 'Đã lên lịch', completed: 'Hoàn thành', cancelled: 'Đã hủy', 'in-progress': 'Đang khám', 'no-show': 'Không đến' };
 const STATUSES = Object.entries(STATUS_LABELS);
+const UPDATE_STATUSES = ['in-progress', 'completed', 'no-show'];
 
 const EMPTY_FORM = { patient_id: '', doctor_id: '', appointment_date: '', appointment_time: '', duration_minutes: 30, reason_for_visit: '' };
 
 export default function AppointmentsPage() {
   const dispatch = useDispatch();
   const { list, pagination, loading, error } = useSelector((s) => s.appointments);
-  const { user } = useSelector((s) => s.auth);
+  const { can } = usePermissions();
 
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [cancelId, setCancelId] = useState(null);
+  const [statusDialog, setStatusDialog] = useState(null); // { id, current }
+  const [newStatus, setNewStatus] = useState('');
   const [form, setForm] = useState(EMPTY_FORM);
   const [formError, setFormError] = useState('');
   const [patients, setPatients] = useState([]);
@@ -64,8 +68,20 @@ export default function AppointmentsPage() {
     load();
   };
 
-  const canCreate = ['admin', 'receptionist', 'patient'].includes(user?.role);
+  const openStatusDialog = (appt) => {
+    setStatusDialog({ id: appt.id, current: appt.status });
+    setNewStatus(appt.status);
+  };
+
+  const handleStatusUpdate = async () => {
+    if (!statusDialog || !newStatus) return;
+    await dispatch(updateAppointmentStatus({ id: statusDialog.id, status: newStatus }));
+    setStatusDialog(null);
+    load();
+  };
+
   const canCancel = (appt) => appt.status !== 'cancelled' && appt.status !== 'completed';
+  const canUpdateStatus = (appt) => appt.status !== 'cancelled' && appt.status !== 'completed';
 
   return (
     <Box>
@@ -80,7 +96,7 @@ export default function AppointmentsPage() {
         </TextField>
         <Button variant="outlined" startIcon={<Refresh />} onClick={() => load()}>Làm mới</Button>
         <Box sx={{ flexGrow: 1 }} />
-        {canCreate && (
+        {can('appointments.create') && (
           <Button variant="contained" startIcon={<Add />} onClick={openCreate}>Đặt lịch hẹn</Button>
         )}
       </Box>
@@ -125,7 +141,12 @@ export default function AppointmentsPage() {
                     <Chip label={STATUS_LABELS[a.status]} color={STATUS_COLORS[a.status]} size="small" />
                   </TableCell>
                   <TableCell align="center">
-                    {canCancel(a) && (
+                    {can('appointments.updateStatus') && canUpdateStatus(a) && (
+                      <IconButton size="small" color="primary" onClick={() => openStatusDialog(a)} title="Cập nhật trạng thái">
+                        <Update fontSize="small" />
+                      </IconButton>
+                    )}
+                    {can('appointments.cancel') && canCancel(a) && (
                       <IconButton size="small" color="error" onClick={() => setCancelId(a.id)} title="Hủy lịch">
                         <Cancel fontSize="small" />
                       </IconButton>
@@ -177,6 +198,25 @@ export default function AppointmentsPage() {
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setDialogOpen(false)}>Hủy</Button>
           <Button variant="contained" onClick={handleSubmit}>Đặt lịch</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Update Status Dialog */}
+      <Dialog open={!!statusDialog} onClose={() => setStatusDialog(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>Cập nhật trạng thái lịch hẹn</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <TextField
+            fullWidth select label="Trạng thái mới" value={newStatus}
+            onChange={(e) => setNewStatus(e.target.value)}
+          >
+            {UPDATE_STATUSES.map((s) => (
+              <MenuItem key={s} value={s}>{STATUS_LABELS[s]}</MenuItem>
+            ))}
+          </TextField>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setStatusDialog(null)}>Hủy</Button>
+          <Button variant="contained" startIcon={<CheckCircle />} onClick={handleStatusUpdate}>Cập nhật</Button>
         </DialogActions>
       </Dialog>
 

@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import { Add, Search, Edit, Delete, Refresh } from '@mui/icons-material';
 import { fetchDepartments, createDepartment, updateDepartment, deleteDepartment } from '../../store/slices/departmentSlice';
+import { usePermissions } from '../../hooks/usePermissions';
 import api from '../../services/api';
 
 const EMPTY_FORM = { name: '', code: '', leader_id: '', phone: '', location: '', floor: '' };
@@ -15,7 +16,7 @@ const EMPTY_FORM = { name: '', code: '', leader_id: '', phone: '', location: '',
 export default function DepartmentsPage() {
   const dispatch = useDispatch();
   const { list, pagination, loading, error } = useSelector((s) => s.departments);
-  const { user } = useSelector((s) => s.auth);
+  const { can } = usePermissions();
 
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -59,7 +60,7 @@ export default function DepartmentsPage() {
     setDeleteId(null); load();
   };
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = can('departments.create');
 
   return (
     <Box>

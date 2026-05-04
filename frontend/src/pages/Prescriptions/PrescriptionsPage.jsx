@@ -10,6 +10,7 @@ import { Add, Search, Delete, Refresh, CheckCircle } from '@mui/icons-material';
 import {
   fetchPrescriptionsByPatient, createPrescription, dispensePrescription, deletePrescription,
 } from '../../store/slices/prescriptionSlice';
+import { usePermissions } from '../../hooks/usePermissions';
 import api from '../../services/api';
 
 const EMPTY_FORM = {
@@ -20,7 +21,7 @@ const EMPTY_FORM = {
 export default function PrescriptionsPage() {
   const dispatch = useDispatch();
   const { list, loading, error } = useSelector((s) => s.prescriptions);
-  const { user } = useSelector((s) => s.auth);
+  const { can } = usePermissions();
 
   const [patientSearch, setPatientSearch] = useState('');
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -73,8 +74,8 @@ export default function PrescriptionsPage() {
     setDeleteId(null);
   };
 
-  const canWrite = ['admin', 'doctor'].includes(user?.role);
-  const canDispense = ['admin', 'nurse'].includes(user?.role);
+  const canWrite = can('prescriptions.create');
+  const canDispense = can('prescriptions.dispense');
 
   const filteredPatients = patients.filter(p =>
     p.full_name?.toLowerCase().includes(patientSearch.toLowerCase()) ||
@@ -178,7 +179,7 @@ export default function PrescriptionsPage() {
                               <CheckCircle fontSize="small" />
                             </IconButton>
                           )}
-                          {['admin'].includes(user?.role) && (
+                          {can('prescriptions.delete') && (
                             <IconButton size="small" color="error" onClick={() => setDeleteId(p.id)}>
                               <Delete fontSize="small" />
                             </IconButton>
