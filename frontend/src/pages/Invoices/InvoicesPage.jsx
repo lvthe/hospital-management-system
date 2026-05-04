@@ -18,6 +18,11 @@ const PAYMENT_METHOD_LABELS = { cash: 'Tiền mặt', credit_card: 'Thẻ tín d
 const ITEM_TYPES = ['consultation', 'medication', 'test', 'equipment'];
 const ITEM_TYPE_LABELS = { consultation: 'Khám bệnh', medication: 'Thuốc', test: 'Xét nghiệm', equipment: 'Thiết bị' };
 
+const today = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
 const EMPTY_ITEM = { item_type: 'consultation', description: '', quantity: 1, unit_price: '' };
 
 export default function InvoicesPage() {
@@ -33,7 +38,7 @@ export default function InvoicesPage() {
   const [patients, setPatients] = useState([]);
   const [formError, setFormError] = useState('');
 
-  const [newInvoice, setNewInvoice] = useState({ patient_id: '', appointment_id: '', due_date: '', items: [{ ...EMPTY_ITEM }] });
+  const [newInvoice, setNewInvoice] = useState({ patient_id: '', appointment_id: '', due_date: today(), items: [{ ...EMPTY_ITEM }] });
   const [payForm, setPayForm] = useState({ amount_paid: '', payment_method: 'cash' });
 
   const load = (p = page, s = statusFilter) => dispatch(fetchInvoices({ page: p, limit: 10, status: s }));
@@ -64,7 +69,7 @@ export default function InvoicesPage() {
       })),
     }));
     if (result.error) setFormError(result.payload || 'Có lỗi xảy ra');
-    else { setCreateOpen(false); setNewInvoice({ patient_id: '', appointment_id: '', due_date: '', items: [{ ...EMPTY_ITEM }] }); load(); }
+    else { setCreateOpen(false); setNewInvoice({ patient_id: '', appointment_id: '', due_date: today(), items: [{ ...EMPTY_ITEM }] }); load(); }
   };
 
   const handlePay = async () => {
