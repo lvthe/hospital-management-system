@@ -52,6 +52,10 @@ const PERMISSIONS = {
 
   // ── Cổng bệnh nhân ────────────────────────────────────────────────
   'patient.portal': ['patient'],
+
+  // ── Quản trị hệ thống ─────────────────────────────────────────────
+  'admin.users':    ['admin'],
+  'admin.settings': ['admin'],
 };
 
 /**

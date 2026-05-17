@@ -8,7 +8,7 @@ import {
 import {
   Dashboard, People, CalendarMonth, LocalHospital, Logout,
   MedicalServices, MedicalInformation, Medication, Receipt,
-  Business, BarChart, Description, AccountCircle,
+  Business, BarChart, Description, AccountCircle, AdminPanelSettings,
 } from '@mui/icons-material';
 import { logout } from '../../store/slices/authSlice';
 
@@ -42,6 +42,12 @@ const STAFF_NAV_GROUPS = [
       { label: 'Hóa đơn',  icon: <Receipt />,  to: '/invoices',    roles: ['admin', 'receptionist', 'doctor'] },
       { label: 'Phòng ban',icon: <Business />, to: '/departments', roles: ['admin', 'doctor', 'nurse', 'receptionist'] },
       { label: 'Báo cáo', icon: <BarChart />,  to: '/reports',     roles: ['admin', 'doctor', 'receptionist'] },
+    ],
+  },
+  {
+    label: 'Hệ thống',
+    items: [
+      { label: 'Quản trị', icon: <AdminPanelSettings />, to: '/admin', roles: ['admin'] },
     ],
   },
 ];

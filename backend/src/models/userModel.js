@@ -79,8 +79,53 @@ const createUser = async ({
   return result.rows[0];
 };
 
+const getUsers = async ({ page = 1, limit = 20, role = '', search = '' }) => {
+  const offset = (page - 1) * limit;
+  const conditions = [];
+  const values = [];
+  let idx = 1;
+
+  if (role) { conditions.push(`role = $${idx}`); values.push(role); idx++; }
+  if (search) { conditions.push(`(full_name ILIKE $${idx} OR email ILIKE $${idx})`); values.push(`%${search}%`); idx++; }
+
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  const total = parseInt((await query(`SELECT COUNT(*) FROM users ${where}`, values)).rows[0].count, 10);
+
+  const sql = `
+    SELECT id, email, full_name, phone, role, is_active, created_at
+    FROM users ${where}
+    ORDER BY created_at DESC
+    LIMIT $${idx} OFFSET $${idx + 1}
+  `;
+  const result = await query(sql, [...values, limit, offset]);
+  return { data: result.rows, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+};
+
+const updateUserRole = async (id, role) => {
+  const sql = `
+    UPDATE users SET role = $1, updated_at = CURRENT_TIMESTAMP
+    WHERE id = $2
+    RETURNING id, email, full_name, role, is_active, updated_at
+  `;
+  const result = await query(sql, [role, id]);
+  return result.rows[0] || null;
+};
+
+const toggleUserActive = async (id, is_active) => {
+  const sql = `
+    UPDATE users SET is_active = $1, updated_at = CURRENT_TIMESTAMP
+    WHERE id = $2
+    RETURNING id, email, full_name, role, is_active, updated_at
+  `;
+  const result = await query(sql, [is_active, id]);
+  return result.rows[0] || null;
+};
+
 module.exports = {
   getUserByEmail,
   getUserById,
   createUser,
+  getUsers,
+  updateUserRole,
+  toggleUserActive,
 };

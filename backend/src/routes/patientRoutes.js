@@ -23,4 +23,9 @@ router.put("/:id", checkRole("admin", "receptionist"), c.update);
 // DELETE /api/v1/patients/:id - xóa (admin only)
 router.delete("/:id", checkRole("admin"), c.remove);
 
+// Sub-resources
+router.get("/:id/medical-records", checkRole("admin", "doctor", "nurse"), c.getPatientMedicalRecords);
+router.get("/:id/appointments",    checkRole("admin", "doctor", "nurse", "receptionist"), c.getPatientAppointments);
+router.get("/:id/invoices",        checkRole("admin", "receptionist"), c.getPatientInvoiceList);
+
 module.exports = router;

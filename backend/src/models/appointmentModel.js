@@ -131,7 +131,18 @@ const checkDoctorAvailability = async (doctor_id, appointment_date, appointment_
   return result.rows.length === 0;
 };
 
+const getBookedSlots = async (doctor_id, date) => {
+  const sql = `
+    SELECT appointment_time FROM appointments
+    WHERE doctor_id = $1 AND appointment_date = $2
+      AND status NOT IN ('cancelled', 'no-show')
+  `;
+  const result = await query(sql, [doctor_id, date]);
+  return result.rows.map(r => r.appointment_time.slice(0, 5));
+};
+
 module.exports = {
   createAppointment, getAppointments, getAppointmentById,
   updateAppointment, updateAppointmentStatus, checkDoctorAvailability,
+  getBookedSlots,
 };

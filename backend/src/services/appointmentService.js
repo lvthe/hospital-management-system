@@ -1,10 +1,17 @@
 const {
   createAppointment, getAppointments, getAppointmentById,
   updateAppointment, updateAppointmentStatus, checkDoctorAvailability,
+  getBookedSlots,
 } = require("../models/appointmentModel");
 const { getPatientByUserId } = require("../models/patientModel");
 const { getDoctorByUserId } = require("../models/doctorModel");
 const { NotFoundError, ValidationError, AuthorizationError } = require("../utils/errorHandler");
+
+const ALL_SLOTS = [
+  '08:00','08:30','09:00','09:30','10:00','10:30',
+  '11:00','11:30','13:00','13:30','14:00','14:30',
+  '15:00','15:30','16:00','16:30','17:00',
+];
 
 const bookAppointment = async (data, requestUser) => {
   const { patient_id, doctor_id, appointment_date, appointment_time, duration_minutes, reason_for_visit, notes } = data;
@@ -67,4 +74,28 @@ const cancelAppointment = async (id, requestUser) => {
   return updateAppointmentStatus(id, 'cancelled');
 };
 
-module.exports = { bookAppointment, listAppointments, getOneAppointment, editAppointment, cancelAppointment };
+const getDoctorAvailableSlots = async (doctor_id, date) => {
+  const booked = await getBookedSlots(doctor_id, date);
+  return ALL_SLOTS.filter(s => !booked.includes(s));
+};
+
+const VALID_STATUSES = ['scheduled', 'completed', 'cancelled', 'no-show'];
+
+const changeAppointmentStatus = async (id, body, requestUser) => {
+  const { status } = body;
+  if (!status || !VALID_STATUSES.includes(status)) {
+    throw new ValidationError(`status phải là một trong: ${VALID_STATUSES.join(', ')}`);
+  }
+
+  const appt = await getAppointmentById(id);
+  if (!appt) throw new NotFoundError("Lịch hẹn");
+  if (appt.status === 'cancelled') throw new ValidationError("Lịch hẹn đã bị hủy");
+
+  return updateAppointmentStatus(id, status);
+};
+
+module.exports = {
+  bookAppointment, listAppointments, getOneAppointment,
+  editAppointment, cancelAppointment,
+  getDoctorAvailableSlots, changeAppointmentStatus,
+};

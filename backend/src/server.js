@@ -84,6 +84,7 @@ app.use('/api/v1/prescriptions',  require('./routes/prescriptionRoutes'));
 app.use('/api/v1/invoices',       require('./routes/invoiceRoutes'));
 app.use('/api/v1/departments',    require('./routes/departmentRoutes'));
 app.use('/api/v1/reports',        require('./routes/reportRoutes'));
+app.use('/api/v1/admin',          require('./routes/adminRoutes'));
 
 /**
  * ==================================================

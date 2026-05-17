@@ -1,4 +1,8 @@
-const { bookAppointment, listAppointments, getOneAppointment, editAppointment, cancelAppointment } = require("../services/appointmentService");
+const {
+  bookAppointment, listAppointments, getOneAppointment,
+  editAppointment, cancelAppointment,
+  getDoctorAvailableSlots, changeAppointmentStatus,
+} = require("../services/appointmentService");
 const { ValidationError } = require("../utils/errorHandler");
 const Joi = require("joi");
 
@@ -53,4 +57,20 @@ const cancel = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-module.exports = { list, get, create, update, cancel };
+const getAvailability = async (req, res, next) => {
+  try {
+    const { doctor_id, date } = req.query;
+    if (!doctor_id || !date) throw new ValidationError("doctor_id và date là bắt buộc");
+    const slots = await getDoctorAvailableSlots(doctor_id, date);
+    res.json({ success: true, data: { doctor_id, date, available_slots: slots } });
+  } catch (err) { next(err); }
+};
+
+const updateStatus = async (req, res, next) => {
+  try {
+    const appt = await changeAppointmentStatus(req.params.id, req.body, req.user);
+    res.json({ success: true, data: appt, message: "Cập nhật trạng thái thành công" });
+  } catch (err) { next(err); }
+};
+
+module.exports = { list, get, create, update, cancel, getAvailability, updateStatus };

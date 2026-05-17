@@ -19,6 +19,7 @@ import DepartmentsPage from './pages/Departments/DepartmentsPage';
 import ReportsPage from './pages/Reports/ReportsPage';
 import PatientPortalPage from './pages/Patient/PatientPortalPage';
 import UnauthorizedPage from './pages/Unauthorized/UnauthorizedPage';
+import AdminPage from './pages/Admin/AdminPage';
 
 const theme = createTheme({
   palette: {
@@ -118,6 +119,11 @@ export default function App() {
             {/* ── Báo cáo ───────────────────────────────────────────*/}
             <Route path="reports" element={
               <RoleRoute permission="reports.view"><ReportsPage /></RoleRoute>
+            } />
+
+            {/* ── Quản trị ──────────────────────────────────────────*/}
+            <Route path="admin" element={
+              <RoleRoute roles={['admin']}><AdminPage /></RoleRoute>
             } />
           </Route>
 

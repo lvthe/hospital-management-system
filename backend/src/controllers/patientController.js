@@ -2,6 +2,9 @@ const {
   createPatientRecord, listPatients, getOnePatient,
   getMyPatientProfile, editPatient, removePatient,
 } = require("../services/patientService");
+const { getPatientRecords } = require("../services/medicalRecordService");
+const { listAppointments } = require("../services/appointmentService");
+const { getPatientInvoices } = require("../services/invoiceService");
 const { patientSchema } = require("../utils/validators");
 const { ValidationError } = require("../utils/errorHandler");
 
@@ -53,4 +56,32 @@ const remove = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-module.exports = { list, get, getMyProfile, create, update, remove };
+const getPatientMedicalRecords = async (req, res, next) => {
+  try {
+    const data = await getPatientRecords(req.params.id);
+    res.json({ success: true, data });
+  } catch (err) { next(err); }
+};
+
+const getPatientAppointments = async (req, res, next) => {
+  try {
+    const { status, date_from } = req.query;
+    const result = await listAppointments(
+      { page: 1, limit: 100, patient_id: req.params.id, status, date_from },
+      req.user,
+    );
+    res.json({ success: true, data: result.data, pagination: result.pagination });
+  } catch (err) { next(err); }
+};
+
+const getPatientInvoiceList = async (req, res, next) => {
+  try {
+    const data = await getPatientInvoices(req.params.id);
+    res.json({ success: true, data });
+  } catch (err) { next(err); }
+};
+
+module.exports = {
+  list, get, getMyProfile, create, update, remove,
+  getPatientMedicalRecords, getPatientAppointments, getPatientInvoiceList,
+};

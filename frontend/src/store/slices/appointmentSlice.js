@@ -30,7 +30,7 @@ export const cancelAppointment = createAsyncThunk('appointments/cancel', async (
 
 export const updateAppointmentStatus = createAsyncThunk('appointments/updateStatus', async ({ id, status }, { rejectWithValue }) => {
   try {
-    const { data } = await api.put(`/appointments/${id}`, { status });
+    const { data } = await api.put(`/appointments/${id}/status`, { status });
     return data.data;
   } catch (err) {
     return rejectWithValue(err.response?.data?.message || 'Lỗi cập nhật trạng thái');
